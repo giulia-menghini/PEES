@@ -61,7 +61,7 @@ for f in franchise:
 
 
     encantamento = conciliacaoenc[(conciliacaoenc['Grupo_2'] == f) & (((conciliacaoenc['Semana_S_2'] >= '2021-12-01') & (conciliacaoenc['Semana_S_2'] <= '2021-12-31')) | ((conciliacaoenc['Semana_S_6'] >= '2021-12-01') & (conciliacaoenc['Semana_S_6'] <= '2021-12-31')))]
-    encantamento_o = encantamento[['Afiliacoes_Consideradas', 'Grupo_3', 'Email_do_Vendedor', 'Data_de_Cadastro', 'Semana_de_Cadastro', 'Semana_S_2', 'Mês_S_2', 'Visitas_S_2_Planejadas', 'Visitas_S_2_Finalizadas', 'Semana_S_6', 'Mês_S_6', 'Visitas_S_6_Planejadas', 'Visitas_S_6_Finalizadas']]
+    encantamento_o = encantamento[['Afiliacoes_Consideradas', 'Grupo_3', 'Email_do_Vendedor', 'Data_de_Cadastro', 'Semana_de_Cadastro', 'Semana_S_2', 'Mês_S_2', 'Visitas_S_2_Planejadas', 'Visitas_S_2_Finalizadas', 'Semana_S_6', 'Mês_S_6', 'Visitas_Entre_D_31_e_D_60_Planejadas', 'Visitas_Entre_D_31_e_D_60_Finalizadas']]
 
     d15p = (encantamento2[encantamento2['FRANQUIA'] == f]['plan d+15'])
     d15r = (encantamento2[encantamento2['FRANQUIA'] == f]['real d+15'])
@@ -78,7 +78,7 @@ for f in franchise:
 
 
 
-    segurost = seguros[(seguros['Polo'] == f)]
+    segurost = seguros[(seguros['Franquia'] == f)]
     seguros_o = segurost[['Cliente', 'Documento', 'status', 'signedDate', 'productName', 'agentEmail']]
 
     na_m0 = float(resultsm0[resultsm0['FRANQUIA'] == f]['NOVOS ATIVOS'])
@@ -316,14 +316,6 @@ for f in franchise:
                                              'value': 3,
                                              'format': green_format})
 
-        worksheet.conditional_format('D16', {'type': 'cell',
-                                             'criteria': '<',
-                                             'value': 10,
-                                             'format': red_format})
-        worksheet.conditional_format('D16', {'type': 'cell',
-                                             'criteria': '>=',
-                                             'value': 10,
-                                             'format': green_format})
 
         worksheet.conditional_format('F16', {'type': 'cell',
                                              'criteria': '<',
@@ -945,13 +937,14 @@ for f in franchise:
         worksheet2.write('F1', 'Material de Apoio', format_sheets_titulo)
         worksheet2.write('A2', 'Atingimento Novos Ativos', format_sheets_negrito2)
         worksheet2.write('A3', 'HC Efetivo Comercial', format_sheets_negrito2)
-        worksheet2.write('A4', 'Clientes Migrados (>=70%)', format_sheets_negrito2)
+        worksheet2.write('A4', 'Migração Hunter', format_sheets_negrito2)
         worksheet2.write('A5', 'Churn Base', format_sheets_negrito2)
         worksheet2.write('A6', 'NA com Domicílio', format_sheets_negrito2)
         worksheet2.write('A7', 'Preço Estrelado', format_sheets_negrito2)
         worksheet2.write('A8', 'Seguros', format_sheets_negrito2)
         worksheet2.write('A9', 'RGR', format_sheets_negrito2)
-        worksheet2.write('A10', 'Visita à Base', format_sheets_negrito2)
+        worksheet2.write('A10', 'Fidelidade', format_sheets_negrito2)
+        worksheet2.write('A11', 'Encantamento', format_sheets_negrito2)
         worksheet2.write('B2', 'Abaixo ou igual a 84,99%', format_sheets2)
         worksheet2.write('B3', 'Abaixo ou igual a 79,99%', format_sheets2)
         worksheet2.write('B4', 'Abaixo de 39,99%', format_sheets2)
@@ -960,7 +953,8 @@ for f in franchise:
         worksheet2.write('B7', 'Abaixo ou igual a 2,89', format_sheets2)
         worksheet2.write('B8', 'Abaixo de 80% de atingimento', format_sheets2)
         worksheet2.write('B9', 'Planos não enviados via Yungas', format_sheets2)
-        worksheet2.write('B10', 'Abaixo ou igual a 79,99%', format_sheets2)
+        worksheet2.write('B10', 'Abaixo ou igual a 14,99%', format_sheets2)
+        worksheet2.write('B11', 'Abaixo ou igual a 79,99%', format_sheets2)
         worksheet2.write('C2', '85% a 99,99%', format_sheets2)
         worksheet2.write('C3', '-', format_sheets2)
         worksheet2.write('C4', '40% a 44,99%', format_sheets2)
@@ -969,7 +963,8 @@ for f in franchise:
         worksheet2.write('C7', '2,90 a 2,99', format_sheets2)
         worksheet2.write('C8', 'Entre 80% e 100% de atingimento', format_sheets2)
         worksheet2.write('C9', 'Planos enviados via Yungas', format_sheets2)
-        worksheet2.write('C10', '80% ou mais', format_sheets2)
+        worksheet2.write('C10', '15% dos NA com contrato', format_sheets2)
+        worksheet2.write('C11', '80% ou mais', format_sheets2)
         worksheet2.write('D2', '100% a 109,99%', format_sheets2)
         worksheet2.write('D3', '80% a 89,99%', format_sheets2)
         worksheet2.write('D4', '45% a 49,99%', format_sheets2)
@@ -979,6 +974,7 @@ for f in franchise:
         worksheet2.write('D8', '100% de atingimento ou mais', format_sheets2)
         worksheet2.write('D9', '-', format_sheets2)
         worksheet2.write('D10', '-', format_sheets2)
+        worksheet2.write('D11', '-', format_sheets2)
         worksheet2.write('E2', '110% ou mais', format_sheets2)
         worksheet2.write('E3', '90% ou mais', format_sheets2)
         worksheet2.write('E4', '50% ou mais', format_sheets2)
@@ -988,6 +984,7 @@ for f in franchise:
         worksheet2.write('E8', '-', format_sheets2)
         worksheet2.write('E9', '-', format_sheets2)
         worksheet2.write('E10', '-', format_sheets2)
+        worksheet2.write('E11', '-', format_sheets2)
         worksheet2.write('F2', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/novos-ativos', format_sheets2)
         worksheet2.write('F3', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/hc-efetivo-comercial', format_sheets2)
         worksheet2.write('F4', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/migra%C3%A7%C3%A3o-hunter', format_sheets2)
@@ -996,7 +993,8 @@ for f in franchise:
         worksheet2.write('F7', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/pre%C3%A7o-estrelado', format_sheets2)
         worksheet2.write('F8', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes', format_sheets2)
         worksheet2.write('F9', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/rgr', format_sheets2)
-        worksheet2.write('F10', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/encantamento', format_sheets2)
+        worksheet2.write('F10', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes', format_sheets2)
+        worksheet2.write('F11', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/encantamento', format_sheets2)
         # </editor-fold>
 
         # <editor-fold desc="Novos Ativos e Domicílio Sheet">
@@ -1125,11 +1123,11 @@ for f in franchise:
         writer.sheets['Preço Estrelado'].write('B5', clientes4, format_sheets)
         writer.sheets['Preço Estrelado'].write('B6', clientes5, format_sheets)
         writer.sheets['Preço Estrelado'].write('B7', clientest, format_sheets)
-        writer.sheets['Preço Estrelado'].write_formula('C2', '=A2/B7', percentage)
-        writer.sheets['Preço Estrelado'].write_formula('C3', '=A3/B7', percentage)
-        writer.sheets['Preço Estrelado'].write_formula('C4', '=A4/B7', percentage)
-        writer.sheets['Preço Estrelado'].write_formula('C5', '=A5/B7', percentage)
-        writer.sheets['Preço Estrelado'].write_formula('C6', '=A6/B7', percentage)
+        writer.sheets['Preço Estrelado'].write_formula('C2', '=B2/B7', percentage)
+        writer.sheets['Preço Estrelado'].write_formula('C3', '=B3/B7', percentage)
+        writer.sheets['Preço Estrelado'].write_formula('C4', '=B4/B7', percentage)
+        writer.sheets['Preço Estrelado'].write_formula('C5', '=B5/B7', percentage)
+        writer.sheets['Preço Estrelado'].write_formula('C6', '=B6/B7', percentage)
         writer.sheets['Preço Estrelado'].write('A9', 'Afiliações Consideradas', format_sheets_titulo)
         writer.sheets['Preço Estrelado'].write('B9', 'Nome do Cliente', format_sheets_titulo)
         writer.sheets['Preço Estrelado'].write('C9', 'Data de Cadastro', format_sheets_titulo)
