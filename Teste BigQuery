@@ -1,0 +1,21 @@
+pip install --upgrade google-cloud-BigQuery
+export GOOGLE_APPLICATION_CREDENTIALS="/home/user/Downloads/my-key.json"
+
+
+from google.cloud import BigQuery
+BigQuery_client = BigQuery.Client()
+
+
+name_group_query = """
+    SELECT
+    *
+FROM `ctra-comercial-1554819299431.metabase_call_de_vendas.consolidado_novos_ativos`
+WHERE 1=1
+    AND LAST_DAY(Data) = '2022-01-31'
+    AND Subcanal = 'FRANQUIA'
+    AND Forca_de_Venda = 'FRANQUIA'
+"""
+
+query_results = BigQuery_client.query(name_group_query)  
+for result in query_results:
+    print(str(result[0])+”,”+str(result[1]))
