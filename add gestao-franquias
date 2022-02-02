@@ -1,0 +1,10 @@
+  name   = "gestao-franquias"
+  folder = "${module.tech-external.non-production-folder}"
+}
+
+module "gestao-franquias" {
+  source = "modules/tribe-project"
+
+  name   = "gestao-franquias"
+  folder = "${module.tech-external.production-folder}"
+}
