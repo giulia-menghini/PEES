@@ -36,7 +36,7 @@ for f in franchise:
     na_total = (resultsm0[resultsm0['FRANQUIA'] == f]['NOVOS ATIVOS'])
 
 
-    time_t = conciliacaotime[(conciliacaotime['Grupo_3'] == f) & (conciliacaotime['Dia Util'] == 1)] # & (conciliacaotime['Status.1'] == 0)]
+    time_t = conciliacaotime[(conciliacaotime['Grupo_4'] == f) & (conciliacaotime['Dia Util'] == 1)] # & (conciliacaotime['Status.1'] == 0)]
     time_o = time_t[['Data', 'Grupo_3', 'Email_do_Vendedor', 'Tarefas_Finalizadas', 'Ativo', 'Qualificacoes', 'Propostas', 'Novos_Clientes', 'HC_Comercial']]
     #agente_d = time_o.loc[time_o['Email_do_Vendedor']].unique()
 
@@ -147,7 +147,7 @@ for f in franchise:
     else:
         cor = "Vermelho"
 
-    with pd.ExcelWriter(f"G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2022\\03. Fechamentos\\05. PEES\\Jan.22\\Arquivos\\Apuração PEES Jan.22 - {f}.xlsx") as writer:
+    with pd.ExcelWriter(f"G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2022\\03. Fechamentos\\05. PEES\\Jan.22\\Arquivos 2\\Apuração PEES Jan.22 - {f}.xlsx") as writer:
 
         workbook = writer.book
         worksheet = workbook.add_worksheet('PEES')
@@ -364,16 +364,16 @@ for f in franchise:
 
         worksheet.conditional_format('D13', {'type': 'cell',
                                              'criteria': '>=',
-                                             'value': 0.05,
+                                             'value': 0.07,
                                              'format': red_format})
         worksheet.conditional_format('D13', {'type': 'cell',
                                              'criteria': '<=',
-                                             'value': 0.04,
+                                             'value': 0.06,
                                              'format': green_format})
         worksheet.conditional_format('D13', {'type': 'cell',
                                              'criteria': 'between',
-                                             'minimum': 0.04,
-                                             'maximum': 0.05,
+                                             'minimum': 0.06,
+                                             'maximum': 0.07,
                                              'format': orange_format})
 
         worksheet.conditional_format('E12', {'type': 'cell',
@@ -809,7 +809,7 @@ for f in franchise:
         worksheet.write('B9', 'jan/22', format_ciman)
         worksheet.write('B10', 'Novos Ativos', format_cima)
         worksheet.write('B11', 'HC Efetivo*', format_cima)
-        worksheet.write('B12', 'Migração Hunter', format_cima)
+        worksheet.write('B12', 'Migração 70%+', format_cima)
         worksheet.write('B13', 'Churn Base', format_cima)
         worksheet.write('B14', 'NA com Domicílio', format_cima)
         worksheet.write('B15', 'Preço Estrelado', format_cima)
@@ -818,8 +818,8 @@ for f in franchise:
         worksheet.write('B18', 'Encantamento', format_cima)
         worksheet.write_formula('C10', f'{round(na_d_m0)}', format_cima)
         worksheet.write_formula('C11', f'{round(hc_d_m0)}', format_cima)
-        worksheet.write_formula('C12', '70', format_percent)
-        worksheet.write('C13', 'Menor que 4%', format_cima)
+        worksheet.write_formula('C12', '50', format_percent)
+        worksheet.write('C13', 'Menor que 6%', format_cima)
         worksheet.write('C14', '50% dos NA', format_cima)
         worksheet.write_formula('C15', '3.00', format_cima)
         worksheet.write('C17', 'Validado', format_cima)
@@ -838,7 +838,7 @@ for f in franchise:
 
         worksheet.write_formula('D18', f'{(encan_m0*100)}', format_percent)
         worksheet.write_formula('E11', f'{(hc_m1*100)}', format_percent)
-        worksheet.write_formula('E12', f'{(mig_m1*100)}', format_percent)
+        worksheet.write_formula('E12', f'{(mig_m1)}', format_percent)
         worksheet.write_formula('E13', f'{(churn_m1)}', format_percent2)
         worksheet.write('E15', price_m1, cell_format1)
         #worksheet.write_formula('E18', f'{(emp_m1*100)}', format_percent)
@@ -882,7 +882,7 @@ for f in franchise:
         worksheet.write('G14', f'{round(dom_grade)}/10', format_cima)
         worksheet.write('G15', f'{round(price_grade)}/10', format_cima)
         worksheet.write('G17', f'{round(rgr_grade)}/5', format_cima)
-        worksheet.write('G16', f'{round(seg_grade)}/5', format_cima)
+        worksheet.write('G16', f'{round(seg_grade)}/10', format_cima)
         worksheet.write('G18', f'{round(enc_grade)}/5', format_cima)
         worksheet.merge_range('K11:M11', final_gradem1, format_cima)
         worksheet.merge_range('K12:M12', final_gradem2, format_cima)
@@ -936,7 +936,7 @@ for f in franchise:
         worksheet2.write('B2', 'Abaixo ou igual a 84,99%', format_sheets2)
         worksheet2.write('B3', 'Abaixo ou igual a 79,99%', format_sheets2)
         worksheet2.write('B4', 'Abaixo de 39,99%', format_sheets2)
-        worksheet2.write('B5', 'Acima ou igual a 5,01%', format_sheets2)
+        worksheet2.write('B5', 'Acima de 7,00%', format_sheets2)
         worksheet2.write('B6', 'Abaixo ou igual a 49,99%', format_sheets2)
         worksheet2.write('B7', 'Abaixo ou igual a 2,89', format_sheets2)
         worksheet2.write('B8', 'Abaixo de 80% de atingimento', format_sheets2)
@@ -945,7 +945,7 @@ for f in franchise:
         worksheet2.write('C2', '85% a 99,99%', format_sheets2)
         worksheet2.write('C3', '-', format_sheets2)
         worksheet2.write('C4', '40% a 44,99%', format_sheets2)
-        worksheet2.write('C5', '4,51% a 5%', format_sheets2)
+        worksheet2.write('C5', '6,51% a 7%', format_sheets2)
         worksheet2.write('C6', '50 a 59,99%', format_sheets2)
         worksheet2.write('C7', '2,90 a 2,99', format_sheets2)
         worksheet2.write('C8', 'Entre 80% e 100% de atingimento', format_sheets2)
@@ -954,7 +954,7 @@ for f in franchise:
         worksheet2.write('D2', '100% a 109,99%', format_sheets2)
         worksheet2.write('D3', '80% a 89,99%', format_sheets2)
         worksheet2.write('D4', '45% a 49,99%', format_sheets2)
-        worksheet2.write('D5', '4,01% a 4,50%', format_sheets2)
+        worksheet2.write('D5', '6,01% a 6,50%', format_sheets2)
         worksheet2.write('D6', '60% ou mais', format_sheets2)
         worksheet2.write('D7', '3,00 ou mais', format_sheets2)
         worksheet2.write('D8', '100% de atingimento ou mais', format_sheets2)
@@ -963,7 +963,7 @@ for f in franchise:
         worksheet2.write('E2', '110% ou mais', format_sheets2)
         worksheet2.write('E3', '90% ou mais', format_sheets2)
         worksheet2.write('E4', '50% ou mais', format_sheets2)
-        worksheet2.write('E5', '4% ou menos', format_sheets2)
+        worksheet2.write('E5', '6% ou menos', format_sheets2)
         worksheet2.write('E6', '-', format_sheets2)
         worksheet2.write('E7', '-', format_sheets2)
         worksheet2.write('E8', '-', format_sheets2)
@@ -1075,7 +1075,7 @@ for f in franchise:
         writer.sheets['Migração'].write('D5', 'Safra do Cliente', format_sheets_titulo)
         writer.sheets['Migração'].write('E5', 'TPV Precificado', format_sheets_titulo)
         writer.sheets['Migração'].write('G5', 'Migração', format_sheets_titulo)
-        writer.sheets['Migração'].write('G5', 'Migrado', format_sheets_titulo)
+        writer.sheets['Migração'].write('H5', 'Migrado', format_sheets_titulo)
         writer.sheets['Migração'].write('C5', 'Nome do Cliente', format_sheets_titulo)
         writer.sheets['Migração'].write('F5', 'TPV', format_sheets_titulo)
         writer.sheets['Migração'].write('A5', 'Mês', format_sheets_titulo)
