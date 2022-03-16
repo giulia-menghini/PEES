@@ -5,11 +5,11 @@ SELECT
     dt_affiliation_date AS Data,
     str_affiliator_vendor_email AS Email_do_Vendedor,
     COUNT(DISTINCT str_afiliacoes_consideradas) AS Novos_Clientes
-FROM `ctra-comercial-1554819299431.core_apurations.basic_hunter_portfolio_2022_01_31`
+FROM `ctra-comercial-1554819299431.core_apurations.basic_hunter_portfolio_2022_02_28`
 WHERE 1=1
     AND str_affiliator_vendor_sales_force_name = 'FRANQUIA'
-    AND dt_reference = '2021-12-31'
-    AND dt_affiliation_date BETWEEN '2022-01-01' AND '2022-01-31'
+    AND dt_reference = '2022-02-28'
+    AND dt_affiliation_date BETWEEN '2022-02-01' AND '2022-02-28'
 GROUP BY
     dt_affiliation_date,
     str_affiliator_vendor_email
@@ -25,7 +25,7 @@ Qualificacoes AS
         `ctra-comercial-1554819299431.metabase_call_de_vendas.consolidado_qualificacoes`
     WHERE 1=1
         AND Subcanal = 'FRANQUIA'
-        AND Data BETWEEN '2022-01-01' AND '2022-01-31'
+        AND Data BETWEEN '2022-02-01' AND '2022-02-28'
     GROUP BY 
         Data,
         Email_do_Vendedor
@@ -41,7 +41,7 @@ Propostas AS
         `ctra-comercial-1554819299431.metabase_planejamento_central.analitico_propostas`
     WHERE 1=1
         AND Subcanal = 'FRANQUIA'
-        AND Data BETWEEN '2022-01-01' AND '2022-01-31'
+        AND Data BETWEEN '2022-02-01' AND '2022-02-28'
     GROUP BY
         Data,
         Agente
@@ -53,11 +53,11 @@ Novos_Ativos AS
     dt_activation_date AS Data,
     str_affiliator_vendor_email AS Email_do_Vendedor,
     COUNT(DISTINCT str_afiliacoes_consideradas) AS Novos_Ativos
-FROM `ctra-comercial-1554819299431.core_apurations.basic_hunter_portfolio_2022_01_31`
+FROM `ctra-comercial-1554819299431.core_apurations.basic_hunter_portfolio_2022_02_28`
 WHERE 1=1
     AND str_affiliator_vendor_sales_force_name = 'FRANQUIA'
-    AND dt_reference = '2022-01-31'
-    AND dt_activation_date BETWEEN '2022-01-01' AND '2022-01-31'
+    AND dt_reference = '2022-02-28'
+    AND dt_activation_date BETWEEN '2022-02-01' AND '2022-02-28'
 GROUP BY
     dt_activation_date,
     str_affiliator_vendor_email),
@@ -65,17 +65,17 @@ GROUP BY
 Estoque AS
 
 (SELECT
-    str_affiliator_vendor_email AS Email_Vendedor,
+    str_affiliator_vendor_email AS Email_do_Vendedor,
     COUNT(DISTINCT str_afiliacoes_consideradas) AS Estoque
 FROM
-  `ctra-comercial-1554819299431.core_apurations.basic_hunter_portfolio_2022_01_31`
+  `ctra-comercial-1554819299431.core_apurations.basic_hunter_portfolio_2022_02_28`
 WHERE 1=1
-    AND LAST_DAY(dt_affiliation_date) = '2022-01-31'
+    AND LAST_DAY(dt_affiliation_date) = '2022-02-28'
     AND dt_activation_date IS NULL
     AND str_affiliator_vendor_sales_force_name = 'FRANQUIA'
-    AND dt_reference = '2022-01-31'
+    AND dt_reference = '2022-02-28'
 GROUP BY
-    Email_Vendedor
+    Email_do_Vendedor
 
 ),
 
@@ -119,9 +119,9 @@ LEFT JOIN
 LEFT JOIN
     Novos_Ativos ON H.Email_do_Vendedor = Novos_Ativos.Email_do_Vendedor AND H.Data = Novos_Ativos.Data
 LEFT JOIN
-    Estoque ON H.Email_do_Vendedor = Estoque.Email_Vendedor AND H.Data = '2022-01-01'
+    Estoque ON H.Email_do_Vendedor = Estoque.Email_do_Vendedor AND H.Data = '2022-02-01'
 WHERE 1=1
-    AND H.Data BETWEEN '2022-01-01' AND '2022-01-31'
+    AND H.Data BETWEEN '2022-02-01' AND '2022-02-28'
     AND H.Subcanal = 'FRANQUIA'
 )
 
@@ -131,6 +131,7 @@ SELECT
     Geral.Grupo_1,
     Geral.Grupo_2,
     Geral.Grupo_3,
+    Geral.Email_do_Vendedor,
     SUM(Ativo) AS Ativo,
     SUM(M0) AS Agentes_M0,
     SUM(M1) AS Agentes_M1,
@@ -155,6 +156,7 @@ GROUP BY
     Geral.Grupo_1,
     Geral.Grupo_2,
     Geral.Grupo_3,
+    Geral.Email_do_Vendedor,
     m.Novos_Clientes,
     m.Novos_Clientes_MTD,
     m.Novos_Ativos,
