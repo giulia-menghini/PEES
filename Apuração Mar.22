@@ -1,0 +1,1214 @@
+import pandas as pd
+import xlsxwriter
+from datetime import datetime, date
+
+
+# <editor-fold desc="Bases">
+resultsm0 = pd.read_excel("G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2022\\03. Fechamentos\\05. PEES\\03. Mar.22\\Consolidado PEES Mar.22.xlsx", sheet_name='m0')
+resultsm1 = pd.read_excel("G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2022\\03. Fechamentos\\05. PEES\\03. Mar.22\\Consolidado PEES Mar.22.xlsx", sheet_name='m1')
+resultsm2 = pd.read_excel("G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2022\\03. Fechamentos\\05. PEES\\03. Mar.22\\Consolidado PEES Mar.22.xlsx", sheet_name='m2')
+conciliacao = pd.read_excel("G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2022\\03. Fechamentos\\05. PEES\\03. Mar.22\\Apuração PEES Mar.22.xlsx", sheet_name='Lucro Bruto')
+conciliacaotime = pd.read_excel("G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2022\\03. Fechamentos\\05. PEES\\03. Mar.22\\Apuração PEES Mar.22.xlsx", sheet_name='Time')
+conciliacaoenc = pd.read_excel("G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2022\\03. Fechamentos\\05. PEES\\03. Mar.22\\Apuração PEES Mar.22.xlsx", sheet_name='Encantamento')
+conciliacaope = pd.read_excel("G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2022\\03. Fechamentos\\05. PEES\\03. Mar.22\\Apuração PEES Mar.22.xlsx", sheet_name='Preço Estrelado')
+seguros = pd.read_excel("G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2022\\03. Fechamentos\\05. PEES\\03. Mar.22\\Apuração PEES Mar.22.xlsx", sheet_name='Seguros')
+churn = pd.read_excel("G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2022\\03. Fechamentos\\05. PEES\\03. Mar.22\\Apuração PEES Mar.22.xlsx", sheet_name='Base Ativa')
+
+
+# </editor-fold>
+
+position = 1
+franchise = resultsm0['FRANQUIA']
+
+
+for f in franchise:
+
+    churn_t = churn[(churn['str_group_2'] == f)]
+    churn_o = churn_t[['str_afiliacoes_consideradas', 'str_fantasy_name', 'Base_Ativa_M1', 'Base_Ativa_M0', 'Churn_M0']]
+
+    baseativa = churn_o['Base_Ativa_M1'].sum()
+    baseativa_churn = churn_o['Churn_M0'].sum()
+
+
+    na_t = conciliacao[(conciliacao['str_group_2'] == f) & (conciliacao['dt_activation_date'] >= '2022-03-01') & (conciliacao['dt_activation_date'] <= '2022-03-31')]
+    na_o = na_t[['str_afiliacoes_consideradas', 'str_client_name', 'dt_activation_date', 'str_affiliator_vendor_email', 'str_banking_domicile']]
+    nad_total = (resultsm0[resultsm0['FRANQUIA'] == f] ['NA COM DOMICÍLIO'])
+    na_total = (resultsm0[resultsm0['FRANQUIA'] == f]['NOVOS ATIVOS'])
+
+
+    time_t = conciliacaotime[(conciliacaotime['Grupo_4'] == f) & (conciliacaotime['Dia Util'] == 1)] # & (conciliacaotime['Status.1'] == 0)]
+    time_o = time_t[['Data', 'Grupo_3', 'Email_do_Vendedor', 'Tarefas_Finalizadas', 'Ativo', 'Qualificacoes', 'Propostas', 'Novos_Clientes', 'HC_Comercial']]
+    #agente_d = time_o.loc[time_o['Email_do_Vendedor']].unique()
+
+
+    mig_t = conciliacao[(conciliacao['str_group_2'] == f) & ((conciliacao['dt_activation_date'] < '2022-03-01'))]
+    mig_o = mig_t[['dt_reference', 'str_afiliacoes_consideradas', 'str_client_name', 'dt_activation_date', 'flo_expected_tpv', 'flo_m0_tpv', 'migracao', '70%+']]
+    tpvp_total = float(resultsm0[resultsm0['FRANQUIA'] == f]['TOTAL CLIENTES'])
+    tpvt_total = float(resultsm0[resultsm0['FRANQUIA'] == f]['CLIENTES 70%+'])
+
+
+    p_t = conciliacaope[(conciliacaope['Grupo_4'] == f)]
+    p_o = p_t[['Stonecode', 'Cliente', 'Data_de_Credenciamento', 'Email_do_Agente', 'Estrelas']]
+    clientes1 = p_o.loc[p_o['Estrelas'] == 1, 'Estrelas'].count()
+    clientes2 = p_o.loc[p_o['Estrelas'] == 2, 'Estrelas'].count()
+    clientes3 = p_o.loc[p_o['Estrelas'] == 3, 'Estrelas'].count()
+    clientes4 = p_o.loc[p_o['Estrelas'] == 4, 'Estrelas'].count()
+    clientes5 = p_o.loc[p_o['Estrelas'] == 5, 'Estrelas'].count()
+    clientest = clientes1 + clientes2 + clientes3 + clientes4 + clientes5
+
+
+    encantamento = conciliacaoenc[(conciliacaoenc['Grupo_2'] == f) & (((conciliacaoenc['Semana_S_2'] >= '2022-02-27') & (conciliacaoenc['Semana_S_2'] <= '2022-04-03')))]
+    encantamento_o = encantamento[['Afiliacoes_Consideradas', 'Grupo_3', 'Email_do_Vendedor', 'Data_de_Cadastro', 'Semana_de_Cadastro', 'Semana_S_2', 'Mês_S_2', 'Visitas_S_2_Planejadas', 'Visitas_S_2_Finalizadas']]
+
+    d15p = (resultsm0[resultsm0['FRANQUIA'] == f]['VISITAS PLANEJADAS'])
+    d15r = (resultsm0[resultsm0['FRANQUIA'] == f]['VISITAS REALIZDAS'])
+    #d45p = (encantamento2[encantamento2['FRANQUIA'] == f]['plan d+45'])
+    #d45r = (encantamento2[encantamento2['FRANQUIA'] == f]['real d+45'])
+
+    plan_total = d15p
+    real_total = d15r
+
+
+
+    totalp = d15p
+    totalr = d15r
+
+
+
+    segurost = seguros[(seguros['str_franchise_name'] == f)]
+    seguros_o = segurost[['str_client_name', 'str_client_document', 'str_status', 'dtm_signed', 'str_product_name', 'str_user_email']]
+
+    na_m0 = float(resultsm0[resultsm0['FRANQUIA'] == f]['NOVOS ATIVOS'])
+    na_atg = float(resultsm0[resultsm0['FRANQUIA'] == f]['ATG. NOVOS ATIVOS'])
+    na_d_m0 = float(resultsm0[resultsm0['FRANQUIA'] == f]['META NA'])
+    na_grade = float(resultsm0[resultsm0['FRANQUIA'] == f]['NOTA NA'])
+    na_m1 = float(resultsm1[resultsm1['FRANQUIA'] == f]['NOVOS ATIVOS'])
+
+
+    hc_m0 = float(resultsm0[resultsm0['FRANQUIA'] == f]['HC EFETIVO'])
+    hc_d_m0 = float(resultsm0[resultsm0['FRANQUIA'] == f]['HC EFETIVO META'])
+    hc_grade = float(resultsm0[resultsm0['FRANQUIA'] == f]['NOTA HC'])
+    hc_m1 = float(resultsm1[resultsm1['FRANQUIA'] == f]['ATINGIMENTO HC'])
+
+    mig_m0 = float(resultsm0[resultsm0['FRANQUIA'] == f]['MIGRAÇÃO'])
+    mig_m1 = float(resultsm1[resultsm1['FRANQUIA'] == f]['MIGRAÇÃO'])
+    mig_grade = float(resultsm0[resultsm0['FRANQUIA'] == f]['NOTA MIG'])
+
+    churn_m0 = float(resultsm0[resultsm0['FRANQUIA'] == f]['% CHURN'].replace(",",".").replace("-","0"))
+    churn_m1 = float(resultsm1[resultsm1['FRANQUIA'] == f]['% CHURN'].replace(",",".").replace("-","0"))
+    churn_grade = float(resultsm0[resultsm0['FRANQUIA'] == f]['NOTA CHURN'].replace(",","."))
+
+    dom_m0 = float(resultsm0[resultsm0['FRANQUIA'] == f]['NA COM DOMICÍLIO'])
+    dom_m1 = float(resultsm1[resultsm1['FRANQUIA'] == f]['NA COM DOMICÍLIO'])
+    dom_grade = float(resultsm0[resultsm0['FRANQUIA'] == f]['NOTA DOM'])
+
+    price_m0 = float(resultsm0[resultsm0['FRANQUIA'] == f]['MÉDIA PREÇO ESTRELADO'])
+    price_m1 = float(resultsm1[resultsm1['FRANQUIA'] == f]['MÉDIA PREÇO ESTRELADO'])
+    price_grade = float(resultsm0[resultsm0['FRANQUIA'] == f]['NOTA PE'])
+
+    encan_m0 = float(resultsm0[resultsm0['FRANQUIA'] == f]['ENCANTAMENTO'])
+    encan_m1 = float(resultsm1[resultsm1['FRANQUIA'] == f]['ENCANTAMENTO'].replace(",", "."))
+
+    #emp_m1 = float(resultsm1[resultsm1['FRANQUIA'] == f]['% CONV.'])
+
+    pen_m0 = float(resultsm0[resultsm0['FRANQUIA'] == f]['PENETRAÇÃO'])
+
+    seg = float(resultsm0[resultsm0['FRANQUIA'] == f]['SEGUROS'])
+    seg_meta = float(resultsm0[resultsm0['FRANQUIA'] == f]['META SEGUROS'])
+    seg_atg = float(resultsm0[resultsm0['FRANQUIA'] == f]['ATG SEGUROS'])
+    seg_grade = float(resultsm0[resultsm0['FRANQUIA'] == f]['NOTA SEGUROS'])
+
+    if (float(resultsm0[resultsm0['FRANQUIA'] == f]['RGR']) == 1):
+        rgr_m0 = 'Validado'
+    else:
+        rgr_m0 = 'Não validado'
+
+    if (float(resultsm1[resultsm1['FRANQUIA'] == f]['RGR'] == 1)):
+        rgr_m1 = 'Validado'
+    else:
+        rgr_m1 = 'Não validado'
+
+    rgr_grade = float(resultsm0[resultsm0['FRANQUIA'] == f]['NOTA RGR'])
+
+
+    enc_grade = float(resultsm0[resultsm0['FRANQUIA'] == f]['NOTA ENC'])
+
+    final_gradem0 = float(resultsm0[resultsm0['FRANQUIA'] == f]['NOTA FINAL'])
+    final_gradem1 = float(resultsm1[resultsm1['FRANQUIA'] == f]['NOTA FINAL'])
+    final_gradem2 = float(resultsm2[resultsm2['FRANQUIA'] == f]['NOTA FINAL'])
+    grade = (final_gradem0+final_gradem1+final_gradem2)/3
+
+    if(final_gradem0 >= 70):
+        cor = "Verde"
+    elif(final_gradem0 >=50 and final_gradem0 <70):
+        cor = "Amarelo"
+    elif(final_gradem0 >=30 and final_gradem0 <50):
+        cor = "Laranja"
+    else:
+        cor = "Vermelho"
+
+    with pd.ExcelWriter(f"G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2022\\03. Fechamentos\\05. PEES\\03. Mar.22\\Arquivos\\Apuração PEES Mar.22 - {f}.xlsx") as writer:
+
+        workbook = writer.book
+        worksheet = workbook.add_worksheet('PEES')
+
+        worksheet.hide_gridlines(2) #Remove all gridlines
+        worksheet.set_zoom(60) #Zoom
+
+        # <editor-fold desc="Formats">
+        red_format = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "font_size": 11,
+                "font_color": "#C00000",
+                "align": "center",
+                "valign": "vcenter",
+            }
+        )
+
+        red_format2 = workbook.add_format(
+            {
+                "font": "Calibri",
+                "font_size": 11,
+                "font_color": "#C00000",
+                "align": "center",
+                "valign": "vcenter",
+            }
+        )
+
+        red2_format = workbook.add_format(
+            {
+                "bg_color": "#FF8181",
+                "font": "Sharon Sans Medium",
+                "font_size": 18,
+                "bold": True,
+                "align": "center",
+                "valign": "vcenter",
+            }
+        )
+
+        green_format = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "font_size": 11,
+                "font_color": "#00B050",
+                "align": "center",
+                "valign": "vcenter",
+            }
+        )
+        green_format2 = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "font_size": 11,
+                "font_color": "#00B050",
+                "align": "center",
+                "valign": "vcenter",
+            }
+        )
+
+        green2_format = workbook.add_format(
+            {
+                "bg_color": "#92D050",
+                "font": "Sharon Sans Medium",
+                "font_size": 18,
+                "bold": True,
+                "align": "center",
+                "valign": "vcenter",
+            }
+        )
+
+        yellow_format = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "font_size": 11,
+                "font_color": "#FFC000",
+                "align": "center",
+                "valign": "vcenter",
+            }
+        )
+
+        yellow2_format = workbook.add_format(
+            {
+                "bg_color": "#FFD966",
+                "font": "Sharon Sans Medium",
+                "font_size": 18,
+                "bold": True,
+                "align": "center",
+                "valign": "vcenter",
+            }
+        )
+
+        orange_format = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "font_size": 11,
+                "font_color": "#ED7D31",
+                "align": "center",
+                "valign": "vcenter",
+            }
+        )
+
+        orange2_format = workbook.add_format(
+            {
+                "bg_color": "#F3A169",
+                "font": "Sharon Sans Medium",
+                "font_size": 18,
+                "bold": True,
+                "align": "center",
+                "valign": "vcenter",
+            }
+        )
+
+        worksheet.conditional_format('G19:G20', {'type': 'cell',
+                                             'criteria': 'between',
+                                             'minimum': 30,
+                                             'maximum': 49,
+                                             'format': orange2_format})
+        worksheet.conditional_format('G19:G20', {'type': 'cell',
+                                             'criteria': 'between',
+                                             'minimum': 50,
+                                             'maximum': 69,
+                                             'format': yellow2_format})
+        worksheet.conditional_format('G19:G20', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 29,
+                                             'format': red2_format})
+        worksheet.conditional_format('G19:G20', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 70,
+                                             'format': green2_format})
+
+        worksheet.conditional_format('E19', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 80,
+                                             'format': red_format})
+        worksheet.conditional_format('E19', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 80,
+                                             'format': green_format})
+
+        worksheet.conditional_format('E16', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 10,
+                                             'format': red_format})
+        worksheet.conditional_format('E16', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 10,
+                                             'format': green_format})
+
+        worksheet.conditional_format('E15', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 2.9,
+                                             'format': red_format})
+        worksheet.conditional_format('E15', {'type': 'cell',
+                                             'criteria': 'between',
+                                             'minimum': 2.9,
+                                             'maximum': 2.9999999,
+                                             'format': yellow_format})
+        worksheet.conditional_format('E15', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 3,
+                                             'format': green_format})
+
+
+        worksheet.conditional_format('F16', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 1,
+                                             'format': red_format})
+        worksheet.conditional_format('F16', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 1,
+                                             'format': green_format})
+
+        worksheet.conditional_format('D15', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 2.9,
+                                             'format': red_format})
+        worksheet.conditional_format('D15', {'type': 'cell',
+                                             'criteria': 'between',
+                                             'minimum': 2.9,
+                                             'maximum': 2.9999999,
+                                             'format': yellow_format})
+        worksheet.conditional_format('D15', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 3,
+                                             'format': green_format})
+
+        worksheet.conditional_format('F14', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 40,
+                                             'format': red_format})
+        worksheet.conditional_format('F14', {'type': 'cell',
+                                             'criteria': 'between',
+                                             'minimum': 40,
+                                             'maximum': 49.99,
+                                             'format': orange_format})
+        worksheet.conditional_format('F14', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 5,
+                                             'format': green_format})
+
+        worksheet.conditional_format('E13', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 0.05,
+                                             'format': red_format})
+        worksheet.conditional_format('E13', {'type': 'cell',
+                                             'criteria': '<=',
+                                             'value': 0.04,
+                                             'format': green_format})
+        worksheet.conditional_format('E13', {'type': 'cell',
+                                             'criteria': 'between',
+                                             'minimum': 0.04,
+                                             'maximum': 0.05,
+                                             'format': orange_format})
+
+        worksheet.conditional_format('D13', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 0.07,
+                                             'format': red_format})
+        worksheet.conditional_format('D13', {'type': 'cell',
+                                             'criteria': '<=',
+                                             'value': 0.06,
+                                             'format': green_format})
+        worksheet.conditional_format('D13', {'type': 'cell',
+                                             'criteria': 'between',
+                                             'minimum': 0.06,
+                                             'maximum': 0.07,
+                                             'format': orange_format})
+
+        worksheet.conditional_format('E12', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 70,
+                                             'format': red_format})
+        worksheet.conditional_format('E12', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 70,
+                                             'format': green_format})
+
+        worksheet.conditional_format('E11', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 90,
+                                             'format': red_format})
+        worksheet.conditional_format('E11', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 90,
+                                             'format': green_format})
+
+        worksheet.conditional_format('D12', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 70,
+                                             'format': red_format})
+        worksheet.conditional_format('D12', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 70,
+                                             'format': green_format})
+
+        worksheet.conditional_format('F11', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 90,
+                                             'format': red_format})
+        worksheet.conditional_format('F11', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 90,
+                                             'format': green_format})
+
+        worksheet.conditional_format('D18', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 80,
+                                             'format': red_format})
+        worksheet.conditional_format('D18', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 80,
+                                             'format': green_format})
+
+        worksheet.conditional_format('F10', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 100,
+                                             'format': red_format})
+        worksheet.conditional_format('F10', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 100,
+                                             'format': green_format})
+
+        worksheet.conditional_format('F18', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': 15,
+                                             'format': red_format})
+        worksheet.conditional_format('F18', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': 15,
+                                             'format': green_format})
+
+
+        worksheet.conditional_format('E17', {'type': 'cell',
+                                             'criteria': 'equal to',
+                                             'value': '"Validado"',
+                                             'format': green_format})
+        worksheet.conditional_format('E17', {'type': 'cell',
+                                             'criteria': 'equal to',
+                                             'value': '"Não validado"',
+                                             'format': red_format})
+
+        worksheet.conditional_format('E18', {'type': 'cell',
+                                             'criteria': 'equal to',
+                                             'value': '"Feito"',
+                                             'format': green_format})
+        worksheet.conditional_format('E18', {'type': 'cell',
+                                             'criteria': 'equal to',
+                                             'value': '"Não feito"',
+                                             'format': red_format})
+
+        worksheet.conditional_format('D17', {'type': 'cell',
+                                             'criteria': 'equal to',
+                                             'value': '"Validado"',
+                                             'format': green_format})
+        worksheet.conditional_format('D17', {'type': 'cell',
+                                             'criteria': 'equal to',
+                                             'value': '"Não validado"',
+                                             'format': red_format})
+        worksheet.conditional_format('D18', {'type': 'cell',
+                                             'criteria': 'equal to',
+                                             'value': '"Feito"',
+                                             'format': green_format})
+        worksheet.conditional_format('D18', {'type': 'cell',
+                                             'criteria': 'equal to',
+                                             'value': '"Não feito"',
+                                             'format': red_format})
+
+        worksheet.conditional_format('C6:G7', {'type': 'cell',
+                                             'criteria': 'equal to',
+                                             'value': '"AMARELO"',
+                                             'format': yellow2_format})
+        worksheet.conditional_format('C6:G7', {'type': 'cell',
+                                             'criteria': 'equal to',
+                                             'value': '"VERDE"',
+                                             'format': green2_format})
+        worksheet.conditional_format('C6:G7', {'type': 'cell',
+                                             'criteria': 'equal to',
+                                             'value': '"VERMELHO"',
+                                             'format': red2_format})
+        worksheet.conditional_format('C6:G7', {'type': 'cell',
+                                             'criteria': 'equal to',
+                                             'value': '"LARANJA"',
+                                             'format': orange2_format})
+
+
+        format_franquia = workbook.add_format(
+            {
+                "font": "Sharon Sans Medium",
+                "font_size": 22,
+                "font_color": "#000000",
+                "align": "center",
+                "valign": "vcenter",
+            }
+        )
+
+        format_verde = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "font_size": 10,
+                "font_color": "#FFFFFF",
+                "bg_color": "#00B050",
+                "align": "center",
+                "valign": "vcenter",
+                "bold": True
+            }
+        )
+
+        format_cima = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 11,
+                "border": 1,
+                "border_color": "#BFBFBF"
+            }
+
+        )
+
+        format_sheets = workbook.add_format(
+            {
+                "font": "Calibri",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 11,
+            }
+
+        )
+
+        format_sheets2c = workbook.add_format(
+            {
+                "font": "Calibri",
+                'num_format': 'R$ 0.00',
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 11,
+            }
+
+        )
+
+        format_sheets2 = workbook.add_format(
+            {
+                "font": "Calibri",
+                "align": "left",
+                "valign": "vcenter",
+                "font_size": 11,
+            }
+
+        )
+
+        center = workbook.add_format(
+            {
+                "align": "center"
+            }
+        )
+
+        center_pct = workbook.add_format(
+            {
+                "align": "center",
+                'num_format': "0.00%"
+            }
+        )
+
+        format_sheets_titulo = workbook.add_format(
+            {
+                "font": "Calibri",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 11,
+                "font_color": "#FFFFFF",
+                "bg_color": "#00B050",
+                "bold": True
+            }
+
+        )
+
+        format_sheets_titulo2 = workbook.add_format(
+            {
+                "font": "Calibri",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 11,
+                "font_color": "#FFFFFF",
+                "bg_color": "#A6A6A6",
+                "bold": True
+            }
+
+        )
+
+        format_sheets_negrito = workbook.add_format(
+            {
+                "font": "Calibri",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 11,
+                "bold": True
+            }
+
+        )
+        format_sheets_negrito2 = workbook.add_format(
+            {
+                "font": "Calibri",
+                "align": "left",
+                "valign": "vcenter",
+                "font_size": 11,
+                "bold": True
+            }
+
+        )
+        cell_format1 = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 11,
+                "border": 1,
+                "border_color": "#BFBFBF"
+            }
+        )
+        cell_format1.set_num_format('0.00')
+
+
+        format_percent = workbook.add_format(
+            {
+                'num_format': '0"%"',
+                "font": "Sharon Sans",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 11,
+                "border": 1,
+                "border_color": "#BFBFBF",
+            }
+
+        )
+
+
+        format_ciman = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 11,
+                "bold": True
+            }
+
+        )
+
+        format_percent_sheets = workbook.add_format(
+            {
+                'num_format': '0"%"',
+                "font": "Calibri",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 11
+            }
+
+        )
+
+        format_percent2 = workbook.add_format(
+            {
+                'num_format': '0.00%',
+                "font": "Sharon Sans",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 11,
+                "border": 1,
+                "border_color": "#BFBFBF",
+            }
+
+        )
+
+        percentage = workbook.add_format(
+            {
+                'num_format': '0%',
+                "align": "center",
+                "valign": "vcenter"
+            }
+
+        )
+
+        percentage2c = workbook.add_format(
+            {
+                'num_format': '0.00%',
+                "align": "center",
+                "valign": "vcenter"
+            }
+
+        )
+
+
+        format_cima1 = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 11
+            }
+
+        )
+
+        format_baixo = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 16,
+                "border": 2,
+                "border_color": "#BFBFBF"
+            }
+
+        )
+
+        format_nota = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 20,
+                "bold": True,
+                "border": 2,
+                "bg_color": "#92D050",
+                "border_color": "#BFBFBF"
+            }
+
+        )
+
+        format_posicao = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 14,
+                "border": 2,
+                "border_color": "#BFBFBF"
+            }
+
+        )
+
+        format_posicao2 = workbook.add_format(
+            {
+                "font": "Sharon Sans",
+                "align": "center",
+                "valign": "vcenter",
+                "font_size": 14,
+                "bold": True,
+                "border": 2,
+                "border_color": "#BFBFBF"
+            }
+
+        )
+
+        format_farol = workbook.add_format(
+            {
+                "bg_color": "#92D050",
+                "font": "Sharon Sans Medium",
+                "font_size": 18,
+                "bold": True,
+                "align": "center",
+                "valign": "vcenter"
+            }
+
+                    )
+
+        # </editor-fold>
+
+        # <editor-fold desc="Images">
+        peesimg = "G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2021\\3. Demandas pontuais\\Testes\\PEES\\peesimage.png"
+        trofeuimg = "G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2021\\3. Demandas pontuais\\Testes\\PEES\\trofeuimage.png"
+        seloimg = "G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2021\\3. Demandas pontuais\\Testes\\PEES\\seloimage.png"
+        seloimg2 = "G:\\Drives compartilhados\\Gente e Gestão FVT\\Lucas\\2021\\3. Demandas pontuais\\Testes\\PEES\\seloimage2.png"
+
+        worksheet.insert_image("B6", peesimg, {'x_offset': -20, 'y_offset': -35})
+        worksheet.insert_image("L16", trofeuimg, {'x_offset': 0, 'y_offset': 10})
+        # </editor-fold>
+
+        # <editor-fold desc="PEES Sheet">
+        worksheet.merge_range('C3:G4', f, format_franquia)
+        worksheet.merge_range('C5:G5', 'FAROL DO MÊS:', format_cima1)
+        worksheet.merge_range('C6:G7', cor, format_farol)
+        worksheet.merge_range('I9:M10', 'NOTA MESES PASSADOS', format_verde)
+        worksheet.merge_range('I16:M17', 'TOP 5', format_verde)
+        worksheet.merge_range('D19:F20', 'NOTA DO MÊS:', format_baixo)
+        worksheet.merge_range('G19:G20', final_gradem0, format_nota)
+        worksheet.merge_range('D21:F22', 'POSIÇÃO:', format_posicao)
+        worksheet.merge_range('G21:G22', position, format_posicao2)
+        worksheet.merge_range('I11:J11', 'Fevereiro', format_cima)
+        worksheet.merge_range('I12:J12', 'Janeiro', format_cima)
+        worksheet.merge_range('I13:J13', 'Média 3 meses:', format_cima)
+        worksheet.merge_range('J18:M18', franchise[0], format_cima)
+        worksheet.merge_range('J19:M19', franchise[1], format_cima)
+        worksheet.merge_range('J20:M20', franchise[2], format_cima)
+        worksheet.merge_range('J21:M21', franchise[3], format_cima)
+        worksheet.merge_range('J22:M22', franchise[4], format_cima)
+        worksheet.write('C9', 'Desafio', format_cima)
+        worksheet.write('D9', 'Realizado', format_cima)
+        worksheet.write('E9', 'M-1', format_cima)
+        worksheet.write('F9', 'Atingimento', format_cima)
+        worksheet.write('G9', 'Nota Conquistada', format_cima)
+        worksheet.write('B9', 'mar/22', format_ciman)
+        worksheet.write('B10', 'Novos Ativos', format_cima)
+        worksheet.write('B11', 'HC Efetivo*', format_cima)
+        worksheet.write('B12', 'Migração 70%+', format_cima)
+        worksheet.write('B13', 'Churn Base', format_cima)
+        worksheet.write('B14', 'NA com Domicílio', format_cima)
+        worksheet.write('B15', 'Preço Estrelado', format_cima)
+        worksheet.write('B17', 'RGR', format_cima)
+        worksheet.write('B16', 'Seguros', format_cima)
+        worksheet.write('B18', 'Encantamento', format_cima)
+        worksheet.write_formula('C10', f'{round(na_d_m0)}', format_cima)
+        worksheet.write_formula('C11', f'{round(hc_d_m0)}', format_cima)
+        worksheet.write_formula('C12', '50', format_percent)
+        worksheet.write('C13', 'Menor que 6%', format_cima)
+        worksheet.write('C14', '50% dos NA', format_cima)
+        worksheet.write_formula('C15', '3.00', format_cima)
+        worksheet.write('C17', 'Validado', format_cima)
+        worksheet.write('C16', seg_meta, format_cima)
+        worksheet.write_formula('C18', '80', format_percent)
+        worksheet.write_formula('D10', f'{round(na_m0)}', format_cima)
+        worksheet.write_formula('D11', f'{round(hc_m0)}', format_cima)
+        worksheet.write_formula('D12', f'{(mig_m0*100)}', format_percent)
+        worksheet.write_formula('D13', f'{(churn_m0)}', format_percent2)
+        worksheet.write('D14', f'{round(dom_m0)} de {(round(na_m0))}', format_cima)
+        worksheet.write('D15', price_m0, cell_format1)
+        worksheet.write('D17', f'{(str(rgr_m0))}',format_cima)
+        worksheet.write('D16', seg,format_cima)
+        worksheet.merge_range('D23:G24', f'Desafio HC Efetivo: {round(hc_d_m0/21)}*21 = {round(hc_d_m0/21)*21} (Meta HC * 21 dias úteis)', format_cima1)
+        worksheet.write_formula('D18', f'{(encan_m0*100)}', format_percent)
+        worksheet.write_formula('E11', f'{(hc_m1*100)}', format_percent)
+        worksheet.write_formula('E12', f'{(mig_m1*100)}', format_percent)
+        worksheet.write_formula('E13', f'{(churn_m1)}', format_percent2)
+        worksheet.write('E15', price_m1, cell_format1)
+        #worksheet.write_formula('E18', f'{(emp_m1*100)}', format_percent)
+        worksheet.write('E18', '-', format_cima)
+        worksheet.write('E17', f'{(str(rgr_m1))}',format_cima)
+        worksheet.write('E16', '-',format_cima)
+        worksheet.write_formula('E19', f'{encan_m1*100}', format_percent)
+
+        try:
+            worksheet.write_formula('F10', f'{(na_atg)*100}', format_percent)
+        except ValueError:
+            worksheet.write('F10', 0, format_cima)
+
+        try:
+            worksheet.write('E14', f'{round(dom_m1)} de {(round(na_m1))}', format_cima)
+        except ValueError:
+            worksheet.write('E14', 0, format_cima)
+
+        try:
+            worksheet.write_formula('E10', f'{round(na_m1)}', format_cima)
+        except ValueError:
+            worksheet.write('E10', 0, format_cima)
+
+        try:
+            worksheet.write_formula('F11', f'{(hc_m0/hc_d_m0)*100}', format_percent)
+        except ZeroDivisionError:
+            worksheet.write('F11', 0, format_cima)
+
+
+        worksheet.write('F12', '-', format_percent)
+        worksheet.write('F13', '-', format_percent)
+        worksheet.write_formula('F14', f'{round(pen_m0*100)}', format_percent)
+        worksheet.write('F15', '-', format_percent)
+        worksheet.write('F17', '-', format_percent)
+        worksheet.write_formula('F16', f'{round(seg_atg*100)}', format_percent)
+        worksheet.write('F18', '-', format_percent)
+        worksheet.write('G10', f'{round(na_grade)}/15', format_cima)
+        worksheet.write('G11', f'{round(hc_grade)}/15', format_cima)
+        worksheet.write('G12', f'{round(mig_grade)}/15', format_cima)
+        worksheet.write('G13', f'{round(churn_grade)}/15', format_cima)
+        worksheet.write('G14', f'{round(dom_grade)}/10', format_cima)
+        worksheet.write('G15', f'{round(price_grade)}/10', format_cima)
+        worksheet.write('G17', f'{round(rgr_grade)}/5', format_cima)
+        worksheet.write('G16', f'{round(seg_grade)}/10', format_cima)
+        worksheet.write('G18', f'{round(enc_grade)}/5', format_cima)
+        worksheet.merge_range('K11:M11', final_gradem1, format_cima)
+        worksheet.merge_range('K12:M12', final_gradem2, format_cima)
+        worksheet.merge_range('K13:M13', round(grade), format_cima)
+        worksheet.write('I18', 1, format_cima)
+        worksheet.write('I19', 2, format_cima)
+        worksheet.write('I20', 3, format_cima)
+        worksheet.write('I21', 4, format_cima)
+        worksheet.write('I22', 5, format_cima)
+
+        if (grade >= 70):
+            selo = seloimg2
+        else:
+            selo = seloimg
+        worksheet.insert_image("J1", selo, {'x_offset':40, 'y_offset': -35})
+
+
+        worksheet.set_column("B:B", 20)
+        worksheet.set_column("C:G", 20)
+        worksheet.set_column("I:M", 10)
+
+        position = position + 1
+
+        for row in range (8, 23):
+            worksheet.set_row(row, 20)
+
+        # </editor-fold>
+
+
+        # <editor-fold desc="Apoio Sheet">
+        worksheet2 = workbook.add_worksheet('Apoio')
+        worksheet2.set_zoom(80)
+        worksheet2.set_column("A:A",32)
+        worksheet2.set_column("B:E",28)
+        worksheet2.set_column("F:F", 90)
+        worksheet2.write('A1', 'KPI', format_sheets_titulo)
+        worksheet2.write('B1', 'Nota 0', format_sheets_titulo)
+        worksheet2.write('C1', 'Nota 5', format_sheets_titulo)
+        worksheet2.write('D1', 'Nota 10', format_sheets_titulo)
+        worksheet2.write('E1', 'Nota 15', format_sheets_titulo)
+        worksheet2.write('F1', 'Material de Apoio', format_sheets_titulo)
+        worksheet2.write('A2', 'Atingimento Novos Ativos', format_sheets_negrito2)
+        worksheet2.write('A3', 'HC Efetivo Comercial', format_sheets_negrito2)
+        worksheet2.write('A4', 'Clientes Migrados 70%+ (M-1 a M-5)', format_sheets_negrito2)
+        worksheet2.write('A5', 'Churn Base', format_sheets_negrito2)
+        worksheet2.write('A6', 'NA com Domicílio', format_sheets_negrito2)
+        worksheet2.write('A7', 'Preço Estrelado (+1 estrela contrato)', format_sheets_negrito2)
+        worksheet2.write('A8', 'Seguros', format_sheets_negrito2)
+        worksheet2.write('A9', 'RGR', format_sheets_negrito2)
+        worksheet2.write('A10', 'Visita à Base', format_sheets_negrito2)
+        worksheet2.write('B2', 'Abaixo ou igual a 84,99%', format_sheets2)
+        worksheet2.write('B3', 'Abaixo ou igual a 79,99%', format_sheets2)
+        worksheet2.write('B4', 'Abaixo de 39,99%', format_sheets2)
+        worksheet2.write('B5', 'Acima de 7,00%', format_sheets2)
+        worksheet2.write('B6', 'Abaixo ou igual a 49,99%', format_sheets2)
+        worksheet2.write('B7', 'Abaixo ou igual a 2,89', format_sheets2)
+        worksheet2.write('B8', 'Abaixo de 80% de atingimento', format_sheets2)
+        worksheet2.write('B9', 'Planos não enviados via Yungas', format_sheets2)
+        worksheet2.write('B10', 'Abaixo ou igual a 79,99%', format_sheets2)
+        worksheet2.write('C2', '85% a 99,99%', format_sheets2)
+        worksheet2.write('C3', '-', format_sheets2)
+        worksheet2.write('C4', '40% a 44,99%', format_sheets2)
+        worksheet2.write('C5', '6,51% a 7%', format_sheets2)
+        worksheet2.write('C6', '50 a 59,99%', format_sheets2)
+        worksheet2.write('C7', '2,90 a 2,99', format_sheets2)
+        worksheet2.write('C8', 'Entre 80% e 100% de atingimento', format_sheets2)
+        worksheet2.write('C9', 'Planos enviados via Yungas', format_sheets2)
+        worksheet2.write('C10', '80% ou mais', format_sheets2)
+        worksheet2.write('D2', '100% a 109,99%', format_sheets2)
+        worksheet2.write('D3', '80% a 89,99%', format_sheets2)
+        worksheet2.write('D4', '45% a 49,99%', format_sheets2)
+        worksheet2.write('D5', '6,01% a 6,50%', format_sheets2)
+        worksheet2.write('D6', '60% ou mais', format_sheets2)
+        worksheet2.write('D7', '3,00 ou mais', format_sheets2)
+        worksheet2.write('D8', '100% de atingimento ou mais', format_sheets2)
+        worksheet2.write('D9', '-', format_sheets2)
+        worksheet2.write('D10', '-', format_sheets2)
+        worksheet2.write('E2', '110% ou mais', format_sheets2)
+        worksheet2.write('E3', '90% ou mais', format_sheets2)
+        worksheet2.write('E4', '50% ou mais', format_sheets2)
+        worksheet2.write('E5', '6% ou menos', format_sheets2)
+        worksheet2.write('E6', '-', format_sheets2)
+        worksheet2.write('E7', '-', format_sheets2)
+        worksheet2.write('E8', '-', format_sheets2)
+        worksheet2.write('E9', '-', format_sheets2)
+        worksheet2.write('E10', '-', format_sheets2)
+        worksheet2.write('F2', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/novos-ativos', format_sheets2)
+        worksheet2.write('F3', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/hc-efetivo-comercial', format_sheets2)
+        worksheet2.write('F4', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/migra%C3%A7%C3%A3o-hunter', format_sheets2)
+        worksheet2.write('F5', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/churn', format_sheets2)
+        worksheet2.write('F6', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/domic%C3%ADlio-banc%C3%A1rio', format_sheets2)
+        worksheet2.write('F7', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/pre%C3%A7o-estrelado', format_sheets2)
+        worksheet2.write('F8', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes', format_sheets2)
+        worksheet2.write('F9', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/rgr', format_sheets2)
+        worksheet2.write('F10', 'https://sites.google.com/stone.com.br/jornaldoempreendedor/pes/encantamento', format_sheets2)
+        # </editor-fold>
+
+        # <editor-fold desc="Novos Ativos e Domicílio Sheet">
+        na_o.to_excel(writer, sheet_name='Novos Ativos e Domicílio', index=False, startrow=3)
+        writer.sheets['Novos Ativos e Domicílio'].conditional_format('C2', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': '50%',
+                                             'format': red_format2})
+        writer.sheets['Novos Ativos e Domicílio'].conditional_format('C2', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': '50%',
+                                             'format': green_format2})
+        writer.sheets['Novos Ativos e Domicílio'].set_column("A:B", 35, center)
+        writer.sheets['Novos Ativos e Domicílio'].set_column("C:C", 20, center)
+        writer.sheets['Novos Ativos e Domicílio'].set_column("D:E", 35, center)
+        writer.sheets['Novos Ativos e Domicílio'].autofilter('A4:E4')
+        writer.sheets['Novos Ativos e Domicílio'].set_zoom(80)
+        writer.sheets['Novos Ativos e Domicílio'].write('A4', 'Afiliações Consideradas', format_sheets_titulo)
+        writer.sheets['Novos Ativos e Domicílio'].write('B4', 'Nome do Cliente', format_sheets_titulo)
+        writer.sheets['Novos Ativos e Domicílio'].write('C4', 'Data de Ativação', format_sheets_titulo)
+        writer.sheets['Novos Ativos e Domicílio'].write('D4', 'Email do Vendedor', format_sheets_titulo)
+        writer.sheets['Novos Ativos e Domicílio'].write('E4', 'Domicílio Bancário', format_sheets_titulo)
+        writer.sheets['Novos Ativos e Domicílio'].write('A1', 'Novos Ativos', format_sheets_titulo)
+        writer.sheets['Novos Ativos e Domicílio'].write('B1', 'Com Domicílio', format_sheets_titulo)
+        writer.sheets['Novos Ativos e Domicílio'].write('C1', '% DB', format_sheets_titulo)
+        writer.sheets['Novos Ativos e Domicílio'].write('A2', na_total, format_sheets)
+        writer.sheets['Novos Ativos e Domicílio'].write('B2', nad_total, format_sheets)
+        writer.sheets['Novos Ativos e Domicílio'].write_formula('C2', '=B2/A2', percentage)
+
+
+
+        # </editor-fold>
+
+        # <editor-fold desc="HC Efetivo Sheet">
+        time_o.to_excel(writer, sheet_name='HC Efetivo', index=False, startcol=4)
+        writer.sheets['HC Efetivo'].set_column("B:C", 20, center)
+        writer.sheets['HC Efetivo'].set_column("F:F", 20, center)
+        writer.sheets['HC Efetivo'].set_column("E:E", 20, center)
+        writer.sheets['HC Efetivo'].set_column("A:A", 35, center)
+        writer.sheets['HC Efetivo'].set_column("G:G", 35, center)
+        writer.sheets['HC Efetivo'].set_column("H:M", 20, center)
+        writer.sheets['HC Efetivo'].autofilter('E1:M1')
+        writer.sheets['HC Efetivo'].set_zoom(80)
+        writer.sheets['HC Efetivo'].write('E1', 'Data', format_sheets_titulo)
+        writer.sheets['HC Efetivo'].write('F1', 'Franquia', format_sheets_titulo)
+        writer.sheets['HC Efetivo'].write('G1', 'Agente', format_sheets_titulo)
+        writer.sheets['HC Efetivo'].write('H1', 'Tarefas Realizadas', format_sheets_titulo)
+        writer.sheets['HC Efetivo'].write('I1', 'Ativo', format_sheets_titulo)
+        writer.sheets['HC Efetivo'].write('J1', 'Qualificações', format_sheets_titulo)
+        writer.sheets['HC Efetivo'].write('K1', 'Propostas', format_sheets_titulo)
+        writer.sheets['HC Efetivo'].write('L1', 'Novos CLientes', format_sheets_titulo)
+        writer.sheets['HC Efetivo'].write('M1', 'Comercial', format_sheets_titulo)
+        writer.sheets['HC Efetivo'].write('A1', '=UNIQUE(G:G)', format_sheets_titulo2)
+        writer.sheets['HC Efetivo'].write('B1', 'Dias Efetivos', format_sheets_titulo2)
+        writer.sheets['HC Efetivo'].write('C1', '% Efetividade', format_sheets_titulo2)
+        df2 = time_o['Email_do_Vendedor'].unique()
+        #writer.sheets['HC Efetivo'].write('A2', df2, center)
+        for agente in range(0,len(df2)):
+            writer.sheets['HC Efetivo'].write_formula(agente+1,1, f'=COUNTIFS(G:G,A{agente+2},M:M,1)', format_sheets)
+            writer.sheets['HC Efetivo'].write_formula(agente+1,2, f'=(B{agente+2}/21)', percentage)
+        # </editor-fold>
+
+        # <editor-fold desc="Migração Sheet">
+        mig_o.to_excel(writer, sheet_name='Migração', index=False, startrow=4)
+        writer.sheets['Migração'].conditional_format('C2', {'type': 'cell',
+                                             'criteria': '<',
+                                             'value': '70%',
+                                             'format': red_format2})
+        writer.sheets['Migração'].conditional_format('C2', {'type': 'cell',
+                                             'criteria': '>=',
+                                             'value': '70%',
+                                             'format': green_format2})
+        writer.sheets['Migração'].conditional_format('G6:G300', {'type': 'cell',
+                                                                 'criteria': '<',
+                                                                 'value': '80%',
+                                                                 'format': red_format2})
+        writer.sheets['Migração'].conditional_format('G6:G300', {'type': 'cell',
+                                                                 'criteria': '>=',
+                                                                 'value': '80%',
+                                                                 'format': green_format2})
+        writer.sheets['Migração'].set_column("A:F", 20, center)
+        writer.sheets['Migração'].set_column("G:G", 20, percentage)
+        writer.sheets['Migração'].set_column("H:H", 20, center)
+        writer.sheets['Migração'].autofilter('A1:C1')
+        writer.sheets['Migração'].autofilter('A5:H5')
+        writer.sheets['Migração'].set_zoom(80)
+        writer.sheets['Migração'].write('A1', 'Total Clientes', format_sheets_titulo2)
+        writer.sheets['Migração'].write('B1', 'Clientes Migrados 70%+', format_sheets_titulo2)
+        writer.sheets['Migração'].write('C1', '%', format_sheets_titulo2)
+        writer.sheets['Migração'].write('A2', tpvp_total, format_sheets)
+        writer.sheets['Migração'].write('B2', tpvt_total, format_sheets)
+        writer.sheets['Migração'].write_formula('C2', '=B2/A2', percentage)
+
+        writer.sheets['Migração'].write('B5', 'Afiliações Consideradas', format_sheets_titulo)
+        writer.sheets['Migração'].write('D5', 'Safra do Cliente', format_sheets_titulo)
+        writer.sheets['Migração'].write('E5', 'TPV Precificado', format_sheets_titulo)
+        writer.sheets['Migração'].write('G5', 'Migração', format_sheets_titulo)
+        writer.sheets['Migração'].write('H5', 'Migrado', format_sheets_titulo)
+        writer.sheets['Migração'].write('C5', 'Nome do Cliente', format_sheets_titulo)
+        writer.sheets['Migração'].write('F5', 'TPV', format_sheets_titulo)
+        writer.sheets['Migração'].write('A5', 'Mês', format_sheets_titulo)
+        #writer.sheets['Migração'].write('F1', 'Total Clientes', format_sheets_titulo2)
+        #writer.sheets['Migração'].write('G1', '%', format_sheets_titulo2)
+        #writer.sheets['Migração'].write('E2', 'Migrando 70%+', format_sheets_titulo2)
+        #writer.sheets['Migração'].write('E3', 'Migrando 50 a 70%', format_sheets_titulo2)
+        #writer.sheets['Migração'].write('E4', 'Migrando 30 a 50%', format_sheets_titulo2)
+        #writer.sheets['Migração'].write('E5', 'Migrando 0 a 30%', format_sheets_titulo2)
+        # </editor-fold>
+
+        # <editor-fold desc="Preço Estrelado Sheet">
+        p_o.to_excel(writer, sheet_name='Preço Estrelado', index=False, startrow=8)
+        writer.sheets['Preço Estrelado'].set_column('A:E', 20, center)
+        writer.sheets['Preço Estrelado'].autofilter('A9:E9')
+        writer.sheets['Preço Estrelado'].set_zoom(80)
+        writer.sheets['Preço Estrelado'].write('A1', 'Estrelas', format_sheets_titulo2)
+        writer.sheets['Preço Estrelado'].write('B1', 'Clientes', format_sheets_titulo2)
+        writer.sheets['Preço Estrelado'].write('C1', '%', format_sheets_titulo2)
+        writer.sheets['Preço Estrelado'].write_formula('A2', '1', format_sheets)
+        writer.sheets['Preço Estrelado'].write_formula('A3', '2', format_sheets)
+        writer.sheets['Preço Estrelado'].write_formula('A4', '3', format_sheets)
+        writer.sheets['Preço Estrelado'].write_formula('A5', '4', format_sheets)
+        writer.sheets['Preço Estrelado'].write_formula('A6', '5', format_sheets)
+        writer.sheets['Preço Estrelado'].write('A7', 'Total', format_sheets_titulo2)
+        writer.sheets['Preço Estrelado'].write('B2', clientes1, format_sheets)
+        writer.sheets['Preço Estrelado'].write('B3', clientes2, format_sheets)
+        writer.sheets['Preço Estrelado'].write('B4', clientes3, format_sheets)
+        writer.sheets['Preço Estrelado'].write('B5', clientes4, format_sheets)
+        writer.sheets['Preço Estrelado'].write('B6', clientes5, format_sheets)
+        writer.sheets['Preço Estrelado'].write('B7', clientest, format_sheets)
+        writer.sheets['Preço Estrelado'].write_formula('C2', '=B2/B7', percentage)
+        writer.sheets['Preço Estrelado'].write_formula('C3', '=B3/B7', percentage)
+        writer.sheets['Preço Estrelado'].write_formula('C4', '=B4/B7', percentage)
+        writer.sheets['Preço Estrelado'].write_formula('C5', '=B5/B7', percentage)
+        writer.sheets['Preço Estrelado'].write_formula('C6', '=B6/B7', percentage)
+        writer.sheets['Preço Estrelado'].write('A9', 'Stonecode', format_sheets_titulo)
+        writer.sheets['Preço Estrelado'].write('B9', 'Nome do Cliente', format_sheets_titulo)
+        writer.sheets['Preço Estrelado'].write('C9', 'Data de Cadastro', format_sheets_titulo)
+        writer.sheets['Preço Estrelado'].write('D9', 'Email do Vendedor', format_sheets_titulo)
+        writer.sheets['Preço Estrelado'].write('E9', 'Preço Estrelado (+1 contrato)', format_sheets_titulo)
+        # </editor-fold>
+
+        # <editor-fold desc="Encantamento Sheet">
+        encantamento_o.to_excel(writer, sheet_name='Encantamento', index=False,startrow=5)
+
+
+        writer.sheets['Encantamento'].conditional_format('D2', {'type': 'cell',
+                                                                'criteria': '<',
+                                                                'value': 80,
+                                                                'format': red_format2})
+        writer.sheets['Encantamento'].conditional_format('D2', {'type': 'cell',
+                                                                'criteria': '>=',
+                                                                'value': 80,
+                                                                'format': green_format2})
+        writer.sheets['Encantamento'].conditional_format('D3', {'type': 'cell',
+                                                                'criteria': '<',
+                                                                'value': 80,
+                                                                'format': red_format2})
+        writer.sheets['Encantamento'].conditional_format('D3', {'type': 'cell',
+                                                                'criteria': '>=',
+                                                                'value': 80,
+                                                                'format': green_format2})
+        writer.sheets['Encantamento'].conditional_format('D4', {'type': 'cell',
+                                                                'criteria': '<',
+                                                                'value': 80,
+                                                                'format': red_format2})
+        writer.sheets['Encantamento'].conditional_format('D4', {'type': 'cell',
+                                                                'criteria': '>=',
+                                                                'value': 80,
+                                                                'format': green_format2})
+        writer.sheets['Encantamento'].set_column("A:M", 20, center)
+        writer.sheets['Encantamento'].autofilter('A6:I6')
+        writer.sheets['Encantamento'].set_zoom(80)
+        writer.sheets['Encantamento'].write('A2', 'D+15', format_sheets_titulo2)
+        writer.sheets['Encantamento'].write('B1', 'Realizados', format_sheets_titulo2)
+        writer.sheets['Encantamento'].write('C1', 'Planejados', format_sheets_titulo2)
+        writer.sheets['Encantamento'].write('D1', '%', format_sheets_titulo2)
+        writer.sheets['Encantamento'].write('B2', d15p, format_sheets)
+        writer.sheets['Encantamento'].write('C2', d15r, format_sheets)
+        writer.sheets['Encantamento'].write_formula('D2', '=B2/C2', percentage)
+        writer.sheets['Encantamento'].write('F6', 'Semana D+15', format_sheets_titulo)
+        writer.sheets['Encantamento'].write('G6', 'Mês D+15', format_sheets_titulo)
+        writer.sheets['Encantamento'].write('H6', 'Visitas D+15 Planejadas', format_sheets_titulo)
+        writer.sheets['Encantamento'].write('I6', 'Visitas D+15 Finalizadas', format_sheets_titulo)
+        writer.sheets['Encantamento'].write('B6', 'Franquia', format_sheets_titulo)
+        writer.sheets['Encantamento'].write('A6', 'Afiliações Consideradas', format_sheets_titulo)
+        writer.sheets['Encantamento'].write('C6', 'Email do Vendedor', format_sheets_titulo)
+        writer.sheets['Encantamento'].write('D6', 'Data de Cadastro', format_sheets_titulo)
+        writer.sheets['Encantamento'].write('E6', 'Semana de Cadastro', format_sheets_titulo)
+        # </editor-fold>
+
+        # <editor-fold desc="Seguros Sheet">
+        seguros_o.to_excel(writer, sheet_name='Seguros', index=False)
+        writer.sheets['Seguros'].autofilter('A1:F1')
+        writer.sheets['Seguros'].set_zoom(80)
+        writer.sheets['Seguros'].set_column("A:A", 30, center)
+        writer.sheets['Seguros'].set_column("B:E", 25, center)
+        writer.sheets['Seguros'].set_column("F:F", 40, center)
+        writer.sheets['Seguros'].write('A1', 'Cliente', format_sheets_titulo)
+        writer.sheets['Seguros'].write('B1', 'Documento', format_sheets_titulo)
+        writer.sheets['Seguros'].write('C1', 'Status', format_sheets_titulo)
+        writer.sheets['Seguros'].write('D1', 'Data de Contratação', format_sheets_titulo)
+        writer.sheets['Seguros'].write('E1', 'Produto', format_sheets_titulo)
+        writer.sheets['Seguros'].write('F1', 'Vendedor', format_sheets_titulo)
+        # </editor-fold>
+
+        # <editor-fold desc="Churn Sheet">
+        churn_o.to_excel(writer, sheet_name='Churn', index=False, startcol=3)
+        writer.sheets['Churn'].set_zoom(80)
+        writer.sheets['Churn'].set_column("A:A", 15, center)
+        writer.sheets['Churn'].set_column("D:D", 35, center)
+        writer.sheets['Churn'].set_column("E:E", 35, center)
+        writer.sheets['Churn'].set_column("F:H", 20, center)
+        writer.sheets['Churn'].autofilter('D1:H1')
+        writer.sheets['Churn'].write('D1', 'Afiliações Consideradas', format_sheets_titulo)
+        writer.sheets['Churn'].write('E1', 'Cliente', format_sheets_titulo)
+        writer.sheets['Churn'].write('F1', 'Base Ativa M1', format_sheets_titulo)
+        writer.sheets['Churn'].write('G1', 'Base Ativa M0', format_sheets_titulo)
+        writer.sheets['Churn'].write('H1', 'Churn', format_sheets_titulo)
+        writer.sheets['Churn'].write('A2', 'Base Ativa M-1', format_sheets_titulo)
+        writer.sheets['Churn'].write('A3', 'Churn', format_sheets_titulo)
+        writer.sheets['Churn'].write('A4', '%Churn', format_sheets_titulo)
+        writer.sheets['Churn'].write('B2', baseativa, center)
+        writer.sheets['Churn'].write('B3', baseativa_churn, center)
+        writer.sheets['Churn'].write_formula('B4', '=B3/B2', percentage2c)
+
+        # </editor-fold>
+
+
+
+
+
+
+
+
+
+
